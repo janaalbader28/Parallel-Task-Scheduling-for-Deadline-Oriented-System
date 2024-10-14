@@ -1,0 +1,90 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <map>
+#include <queue>
+
+struct Task {
+    std::string name;
+    int deadline;  // Days until deadline
+    std::vector<std::string> dependencies;  // Names of tasks that must be completed first
+    bool assigned = false;  // Indicates if the task has been assigned
+};
+
+struct Member {
+    std::string name;
+    bool isAvailable;  // True if available to take new tasks
+};
+
+bool areDependenciesMet(const Task& task, const std::map<std::string, bool>& completedTasks) {
+    for (const std::string& dep : task.dependencies) {
+        if (completedTasks.at(dep) == false) {
+            return false;  // Dependency not met
+        }
+    }
+    return true;
+}
+
+void allocateTasks(std::vector<Task>& tasks, std::vector<Member>& members) {
+    std::sort(tasks.begin(), tasks.end(), [](Task& a, Task& b) {
+        return a.deadline < b.deadline;  // Sort tasks by earliest deadline
+    });
+
+    std::map<std::string, bool> completedTasks;  // Track completion status of tasks
+    for (const auto& task : tasks) {
+        completedTasks[task.name] = false;  // Initially all tasks are incomplete
+    }
+
+    std::map<std::string, std::string> taskAssignments;
+
+    for (auto& task : tasks) {
+        if (!areDependenciesMet(task, completedTasks)) {
+            std::cout << "Task " << task.name << " cannot be assigned yet due to unmet dependencies.\n";
+            continue;  // Skip the task if dependencies are not met
+        }
+
+        bool assigned = false;
+        for (auto& member : members) {
+            if (member.isAvailable) {
+                taskAssignments[task.name] = member.name;
+                member.isAvailable = false;  // Mark member as unavailable
+                task.assigned = true;
+                completedTasks[task.name] = true;  // Mark task as completed
+                assigned = true;
+                break;
+            }
+        }
+
+        if (!assigned) {
+            std::cout << "Task " << task.name << " could not be assigned (no available members).\n";
+        }
+    }
+
+    // Print task assignments
+    std::cout << "\nTask Assignments:" << std::endl;
+    for (const auto& assignment : taskAssignments) {
+        std::cout << "Task: " << assignment.first << " -> Member: " << assignment.second << std::endl;
+    }
+}
+
+int main() {
+    // Define tasks with deadlines and dependencies
+    std::vector<Task> tasks = {
+        {"Task1", 2, {}},  // Task1 has no dependencies
+        {"Task2", 1, {"Task1"}},  // Task2 depends on Task1
+        {"Task3", 5, {}},  // Task3 has no dependencies
+        {"Task4", 3, {"Task2"}}  // Task4 depends on Task2
+    };
+
+    // Define team members and their availability
+    std::vector<Member> members = {
+        {"Alice", true},
+        {"Bob", true},
+        {"Charlie", true}
+    };
+
+    allocateTasks(tasks, members);
+
+    return 0;
+}
