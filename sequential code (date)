@@ -3,6 +3,9 @@
 #include <string>
 #include <algorithm>
 #include <ctime>
+#include <map>
+using namespace std;
+
 
 // Task structure
 struct Task {
