@@ -1,4 +1,3 @@
-TaskID,DeadlineDate,PredecessorID,Duration
 Task1,2024-01-01,,3
 Task2,2024-01-03,Task1,2
 Task3,2024-01-05,Task1,Task2,4
