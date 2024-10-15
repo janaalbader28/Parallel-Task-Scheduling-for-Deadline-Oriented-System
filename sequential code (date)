@@ -1,17 +1,16 @@
-#include <iostream>
-#include <vector>
-#include <string>
-#include <algorithm>
-#include <ctime>
-#include <map>
-using namespace std;
 
+#include <iostream>
+#include <list>
+#include <string>
+#include <map>
+#include <ctime>
 
 // Task structure
 struct Task {
     std::string name;
     std::tm deadline;  // Deadline as a date
-    std::vector<std::string> dependencies;  // Task dependencies
+    std::list<std::string> dependencies;  // Task dependencies
+    int duration;  // Estimated duration in hours
     bool assigned = false;  // Task assignment status
 };
 
@@ -19,36 +18,24 @@ struct Task {
 struct Member {
     std::string name;
     bool isAvailable;  // Availability status of team members
+    int maxHours;      // Maximum hours member can work
+    int assignedHours; // Total hours assigned to the member
+    std::map<std::string, int> tasks; // Assigned tasks with their durations
 };
-
-// Function to calculate the number of days between two dates
-int daysUntilDeadline(const std::tm& deadline) {
-    std::time_t now = std::time(nullptr);  // Current time
-    std::tm today = *std::localtime(&now);  // Convert time to date format
-
-    // Calculate the difference in seconds between the deadline and today
-    std::time_t deadline_time = std::mktime(const_cast<std::tm*>(&deadline));
-    double difference = std::difftime(deadline_time, now) / (60 * 60 * 24);  // Convert seconds to days
-
-    return static_cast<int>(difference);  // Return the number of days
-}
 
 // Helper function to parse a date input as "YYYY-MM-DD"
 std::tm parseDate(const std::string& dateStr) {
     std::tm date = {};
     sscanf(dateStr.c_str(), "%d-%d-%d", &date.tm_year, &date.tm_mon, &date.tm_mday);
-
-    // Adjust for struct tm format (years since 1900, months starting from 0)
-    date.tm_year -= 1900;
-    date.tm_mon -= 1;
-
+    date.tm_year -= 1900; // Adjust for struct tm format (years since 1900)
+    date.tm_mon -= 1;     // Adjust for months starting from 0
     return date;
 }
 
 // Check if dependencies are met for a task
 bool areDependenciesMet(const Task& task, const std::map<std::string, bool>& completedTasks) {
     for (const std::string& dep : task.dependencies) {
-        if (completedTasks.at(dep) == false) {
+        if (!completedTasks.at(dep)) {
             return false;  // Dependency not met
         }
     }
@@ -56,62 +43,72 @@ bool areDependenciesMet(const Task& task, const std::map<std::string, bool>& com
 }
 
 // Function to allocate tasks to available members based on deadlines and dependencies
-void allocateTasks(std::vector<Task>& tasks, std::vector<Member>& members) {
-    std::sort(tasks.begin(), tasks.end(), [](Task& a, Task& b) {
-        return daysUntilDeadline(a.deadline) < daysUntilDeadline(b.deadline);  // Sort by nearest deadline
-    });
-
+void allocateTasks(std::list<Task>& tasks, std::list<Member>& members) {
     std::map<std::string, bool> completedTasks;
     for (const auto& task : tasks) {
         completedTasks[task.name] = false;  // Initialize all tasks as incomplete
     }
 
-    std::map<std::string, std::string> taskAssignments;
+    // While there are tasks to allocate
+    while (!tasks.empty()) {
+        bool taskAssigned = false;
 
-    for (auto& task : tasks) {
-        if (!areDependenciesMet(task, completedTasks)) {
-            std::cout << "Task " << task.name << " cannot be assigned yet due to unmet dependencies.\n";
-            continue;  // Skip if dependencies aren't met
-        }
+        for (auto it = tasks.begin(); it != tasks.end();) {
+            auto& task = *it;
+            if (areDependenciesMet(task, completedTasks)) {
+                for (auto& member : members) {
+                    if (member.isAvailable && (member.assignedHours + task.duration <= member.maxHours)) {
+                        // Assign task to member
+                        member.tasks[task.name] = task.duration; // Store task duration
+                        member.assignedHours += task.duration;  // Update member's assigned hours
+                        task.assigned = true;
+                        completedTasks[task.name] = true;  // Mark task as completed
 
-        bool assigned = false;
-        for (auto& member : members) {
-            if (member.isAvailable) {
-                taskAssignments[task.name] = member.name;
-                member.isAvailable = false;  // Mark member as unavailable
-                task.assigned = true;
-                completedTasks[task.name] = true;  // Mark task as completed
-                assigned = true;
-                break;
+                        it = tasks.erase(it);  // Remove the task from the list
+                        taskAssigned = true;
+                        break;  // Break out to re-evaluate the remaining tasks
+                    }
+                }
+                if (!taskAssigned) {
+                    ++it;  // Move to the next task if not assigned
+                }
+            } else {
+                ++it;  // Move to the next task if dependencies are not met
             }
         }
 
-        if (!assigned) {
-            std::cout << "Task " << task.name << " could not be assigned (no available members).\n";
+        // If no tasks were assigned in this round, break to avoid infinite loop
+        if (!taskAssigned) {
+            break;
         }
     }
 
-    // Print task assignments
-    std::cout << "\nTask Assignments:" << std::endl;
-    for (const auto& assignment : taskAssignments) {
-        std::cout << "Task: " << assignment.first << " -> Member: " << assignment.second << std::endl;
+    // Print detailed schedule for each member
+    std::cout << "\nMember Schedules:\n";
+    for (const auto& member : members) {
+        std::cout << "Member: " << member.name << "\n";
+        std::cout << "Assigned Hours: " << member.assignedHours << "\n";
+        std::cout << "Tasks:\n";
+        for (const auto& task : member.tasks) {
+            std::cout << "  " << task.first << " (Duration: " << task.second << " hours)\n";
+        }
+        std::cout << std::endl;
     }
 }
 
 int main() {
-    // Define tasks with deadlines (YYYY-MM-DD) and dependencies
-    std::vector<Task> tasks = {
-        {"Task1", parseDate("2024-10-20"), {}},  // No dependencies
-        {"Task2", parseDate("2024-10-15"), {"Task1"}},  // Depends on Task1
-        {"Task3", parseDate("2024-11-01"), {}},  // No dependencies
-        {"Task4", parseDate("2024-10-18"), {"Task2"}}  // Depends on Task2
+    // Define tasks with deadlines (YYYY-MM-DD), dependencies, and durations
+    std::list<Task> tasks = {
+        {"Task1", parseDate("2024-10-20"), {}, 3},  // No dependencies, 3 hours
+        {"Task2", parseDate("2024-10-15"), {"Task1"}, 2},  // Depends on Task1, 2 hours
+        {"Task3", parseDate("2024-11-01"), {}, 4},  // No dependencies, 4 hours
+        {"Task4", parseDate("2024-10-18"), {"Task2"}, 5}  // Depends on Task2, 5 hours
     };
 
     // Define team members and their availability
-    std::vector<Member> members = {
-        {"Alice", true},
-        {"Bob", true},
-        {"Charlie", true}
+    std::list<Member> members = {
+        {"Alice", true, 8, 0},  // Can work up to 8 hours
+        {"Bob", true, 10, 0},   // Can work up to 10 hours
     };
 
     allocateTasks(tasks, members);
