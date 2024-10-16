@@ -1,0 +1,53 @@
+Algorithm TaskScheduling(Tasks, Members)
+Data: 
+    Tasks: a set of tasks with names, deadlines, dependencies, and durations
+    Members: a set of team members with names, availability, and max working hours
+Result: 
+    AllocatedTasks: a list of assigned tasks to members with their total hours
+
+Begin
+    Initialize CompletedTasks as empty set
+    Initialize AllocatedTasks as empty list
+
+    For each Task in Tasks do
+        CompletedTasks[Task.name] = false
+
+    CurrentDate = StartDate  // Define the start date
+
+    While Tasks is not empty do
+        For each Member in Members do
+            Member.assignedHours = 0
+            Member.tasks = empty list  // Reset assigned tasks
+
+        Sort Tasks by deadline
+
+        While true do
+            TaskAssignedInRound = false
+            
+            For each Member in Members do
+                If Member.isAvailable then
+                    For each Task in Tasks do
+                        If DependenciesMet(Task, CompletedTasks) and 
+                           Member.assignedHours + Task.duration <= Member.maxHours then
+                            Assign Task to Member
+                            Update Member.assignedHours
+                            Mark Task as completed
+                            Remove Task from Tasks
+                            TaskAssignedInRound = true
+                        End If
+                    End For
+                End If
+            End For
+
+            If not TaskAssignedInRound then
+                Break
+            End If
+        End While
+
+        Record allocations for CurrentDate
+
+        Increment CurrentDate
+    End While
+
+    Return AllocatedTasks
+End
