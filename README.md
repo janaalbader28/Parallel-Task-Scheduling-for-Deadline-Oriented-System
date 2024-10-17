@@ -23,3 +23,11 @@ This project aims to develop an efficient task scheduling system that considers 
 | 1000             | 0.328000                 |
 | 2000             | 1.166000                 |
 | 3000             | 2.633000                 |
+
+## Time-Consuming Parts of Code Execution (1000 tasks)
+
+| Function          | Execution Time (seconds) |
+|-------------------|--------------------------|
+| Read from file    | 0.0050                   |
+| Sort tasks        | 0.0030                   |
+| Task allocation    | 0.1410                   |
