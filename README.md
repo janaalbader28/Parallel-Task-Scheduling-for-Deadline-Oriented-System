@@ -8,9 +8,9 @@ This project aims to develop an efficient task scheduling system that considers 
 
 ##  Objective 
 
-- ** Measure the performance of the sequential code to identify the execution time, the most time-consuming part of the code and the parts to be parallelized.
-- ** Develop a parallel code version that uses multiple processing units to improve performance. 
-- **Text-to-Speech Audio**: compare the performance of the sequential and parallel code to assess improvements in execution time and efficiency.
+- Measure the performance of the sequential code to identify the execution time, the most time-consuming part of the code and the parts to be parallelized.
+- Develop a parallel code version that uses multiple processing units to improve performance. 
+- compare the performance of the sequential and parallel code to assess improvements in execution time and efficiency.
  
 ---
 
