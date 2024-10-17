@@ -26,7 +26,7 @@ This project aims to develop an efficient task scheduling system that considers 
 | 5000 tasks       | 5.9520s                  |
 
 ## Time-Consuming Parts of Code Execution (1000 tasks)
-This project uses 1000 tasks to measure the execution time for the sequential code using the clock() function
+The execution time of each function in the sequential code was measured using the clock() function on a dataset consisting of 1,000 tasks.
 
 | Function          | Execution Time (seconds) |
 |-------------------|--------------------------|
