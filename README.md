@@ -59,16 +59,20 @@ While parallelizing the task allocation function, race conditions occurred in so
 
 Shown below is the execution time with different numbers of cores for both full code and task allocation:
 
-| Method           | 1 Thread | 2 Threads | 4 Threads | 8 Threads |
-|------------------|----------|-----------|-----------|-----------|
-| **No Synchronization** | Full code | 0.1580s | 0.1480s | 0.1570s | 0.1510s |
-| **Task Allocation**    | 0.0740s  | 0.0730s  | 0.0710s  | 0.0710s  |
-| **Critical**           | Full code | 0.1690s | 0.1520s | 0.1560s | 0.1580s |
-| **Task Allocation**    | 0.0780s  | 0.0760s  | 0.0800s  | 0.0790s  |
-| **Atomic**             | Full code | 0.1580s | 0.1520s | 0.1540s | 0.1780s |
-| **Task Allocation**    | 0.0790s  | 0.0790s  | 0.0740s  | 0.0710s  |
-| **Reduction**          | Full code | 0.1430s | 0.1440s | 0.1440s | 0.1480s |
-| **Task Allocation**    | 0.0720s  | 0.0710s  | 0.0750s  | 0.0740s  |
+| Synchronization Method | 1 Thread  | 2 Thread  | 4 Thread  | 8 Thread  |
+|------------------------|-----------|-----------|-----------|-----------|
+| **No Synchronization** |           |           |           |           |
+| Full code              | 0.1580s   | 0.1480s   | 0.1570s   | 0.1510s   |
+| Task allocation        | 0.0740s   | 0.0730s   | 0.0710s   | 0.0710s   |
+| **Critical**           |           |           |           |           |
+| Full code              | 0.1690s   | 0.1520s   | 0.1560s   | 0.1580s   |
+| Task allocation        | 0.0780s   | 0.0760s   | 0.0800s   | 0.0790s   |
+| **Atomic**             |           |           |           |           |
+| Full code              | 0.1580s   | 0.1520s   | 0.1540s   | 0.1780s   |
+| Task allocation        | 0.0790s   | 0.0790s   | 0.0740s   | 0.0710s   |
+| **Reduction**          |           |           |           |           |
+| Full code              | 0.1430s   | 0.1440s   | 0.1440s   | 0.1480s   |
+| Task allocation        | 0.0720s   | 0.0710s   | 0.0750s   | 0.0740s   |
 
 ---
 
