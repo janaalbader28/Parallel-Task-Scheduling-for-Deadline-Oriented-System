@@ -33,3 +33,42 @@ The execution time of each function in the sequential code was measured using th
 | Read from file    | 0.0040s                  |
 | Sort tasks        | 0.0030s                  |
 | Task allocation   | 0.1600s                  |
+
+---
+
+## Parallelization Plan
+
+The **task allocation function** is identified as the most time-consuming part of the code. To improve performance, we will parallelize this function and ensure that the results are correct by addressing any potential race conditions that may arise during parallel execution. This involves solving issues that occur when multiple threads access shared resources concurrently, leading to data inconsistency.
+
+---
+
+## Identified Race Conditions During Parallelization
+
+While parallelizing the task allocation function, race conditions occurred in some variables:
+
+- **member.tasks**: A map that stores the member's tasks and the duration of each. Multiple threads accessing it could cause data corruption or task overwriting.
+- **member.assignedHours**: An integer that tracks the total hours assigned to a member. Concurrent thread updates could lead to incorrect totals due to data races.
+- **task.assigned**: A boolean variable that marks whether a task has been assigned to a member or not. Concurrent updates could lead to inconsistent assignment states.
+- **completedTasks**: A map tracking whether task dependencies are completed. Concurrent updates could result in incorrect or missed updates.
+- **tasks List**: A list of unassigned tasks. Concurrent modifications, such as erasing tasks, could lead to iterator invalidation or list corruption.
+- **tasksAssignedToday**: A boolean indicating if any tasks were assigned today. Concurrent updates could cause incorrect day-end evaluations.
+
+---
+
+## Parallelization Performance (Multiple Cores)
+
+Shown below is the execution time with different numbers of cores for both full code and task allocation:
+
+| Method           | 1 Thread | 2 Threads | 4 Threads | 8 Threads |
+|------------------|----------|-----------|-----------|-----------|
+| **No Synchronization** | Full code | 0.1580s | 0.1480s | 0.1570s | 0.1510s |
+| **Task Allocation**    | 0.0740s  | 0.0730s  | 0.0710s  | 0.0710s  |
+| **Critical**           | Full code | 0.1690s | 0.1520s | 0.1560s | 0.1580s |
+| **Task Allocation**    | 0.0780s  | 0.0760s  | 0.0800s  | 0.0790s  |
+| **Atomic**             | Full code | 0.1580s | 0.1520s | 0.1540s | 0.1780s |
+| **Task Allocation**    | 0.0790s  | 0.0790s  | 0.0740s  | 0.0710s  |
+| **Reduction**          | Full code | 0.1430s | 0.1440s | 0.1440s | 0.1480s |
+| **Task Allocation**    | 0.0720s  | 0.0710s  | 0.0750s  | 0.0740s  |
+
+---
+
