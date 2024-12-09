@@ -76,3 +76,16 @@ Shown below is the execution time with different numbers of cores for both full 
 
 ---
 
+## Speedup and Efficiency  
+
+| **Method**   | **Sequential Time (s)** | **Speedup** | **Efficiency** |
+|--------------|--------------------------|-------------|----------------|
+| Sequential   | 0.225                   | 1.00        | 100%           |
+| Critical     | 0.225                   | 1.48        | 74%            |
+| Atomic       | 0.225                   | 1.48        | 74%            |
+| Reduction    | 0.225                   | 1.56        | 78%            |  
+
+---
+This project demonstrates that transitioning from sequential to parallel processing using synchronization methods can significantly enhance task scheduling performance. Among the methods tested, the Reduction approach achieved the highest efficiency and speedup, showcasing its potential in improving execution times while maintaining accuracy. Future work could further explore advanced optimization techniques to enhance performance in more complex systems.  
+
+
